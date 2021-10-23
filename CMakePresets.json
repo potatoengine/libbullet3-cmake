@@ -1,0 +1,53 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 15,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "msvc-common",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "LIBBULLET3_BUILD_TESTS": true
+      }
+    },
+    {
+      "name": "msvc-debug-shared",
+      "inherits": [ "msvc-common" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "LIBBULLET3_BUILD_SHARED": true
+      }
+    },
+    {
+      "name": "msvc-release-shared",
+      "inherits": [ "msvc-common" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "LIBBULLET3_BUILD_SHARED": true
+      }
+    },
+    {
+      "name": "msvc-debug-static",
+      "inherits": [ "msvc-common" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "LIBBULLET3_BUILD_SHARED": false
+      }
+    },
+    {
+      "name": "msvc-release-static",
+      "inherits": [ "msvc-common" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "LIBBULLET3_BUILD_SHARED": false
+      }
+    }
+  ]
+}

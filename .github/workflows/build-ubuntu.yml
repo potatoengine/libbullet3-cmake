@@ -1,0 +1,55 @@
+name: Build Ubuntu
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
+
+jobs:
+  build-ubuntu:
+    strategy:
+      fail-fast: false
+      matrix:
+        cxx: [ clang++, g++ ]
+        config: [ Debug, RelWithDebInfo ]
+
+    name: '${{ matrix.cxx }} ${{ matrix.config }}'
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+          lfs: true
+      - name: Install Problem Matchers
+        uses: Trass3r/setup-cpp@v1
+        if: matrix.config == 'Debug'
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v3
+      - name: Setup VS Environment
+        uses: seanmiddleditch/gha-setup-vsdevenv@v3
+      - name: Configure
+        env:
+          CXX: ${{ matrix.cxx }}
+        run: |
+          mkdir build
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE:STRING=${{ matrix.config }} -DBUILD_SHARED_LIBS=YES
+      - name: Build
+        run: cmake --build build --parallel -- -k 0 -v
+      - name: Test
+        run: |
+          cd build
+          ctest -T test --verbose
+      - name: Package
+        id: package
+        run: |
+          cd build
+          cpack -G TBZ2
+          echo ::set-output name=archive::build/$(ls *.tar.bz2)
+        if: ${{ matrix.config == 'RelWithDebInfo' }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: bullet-linux
+          path: ${{ steps.Package.outputs.archive }}
+          if-no-files-found: error 
+        if: ${{ matrix.config == 'RelWithDebInfo' }}
